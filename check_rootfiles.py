@@ -123,9 +123,21 @@ if TFile is None:
 RootFileName = Path(RootFile).name
 RootFileParent = Path(RootFile).parent
 
+def print_obj_info(obj, nspc=4):
+	print(' '*nspc+'Object: {}'.format(obj.ClassName()))
+	print(' '*nspc+'Title: {}'.format(obj.GetTitle()))
+	print(' '*nspc+'Name: {}'.format(obj.GetName()))
+	print(' '*nspc+'Size: {} (NBytes)'.format(key.GetNbytes()))
+	return None
+
+def inspect_keys(keylist, nspc=4):
+	print(' '*nspc+'Listing content of keys')
+	for j, key in enumerate(keylist):
+		obj = key.ReadObj()
+		print_obj_info(obj, nspc=nspc)
+	return None
 
 key_list = TFile.GetListOfKeys()
-
 
 if ListContent:
 	print('Listing content:')
@@ -134,18 +146,24 @@ if ListContent:
 	for j, key in enumerate(key_list):
 		obj = key.ReadObj()
 		print('\nkey: {}'.format(j))
-		print('    Object: {}'.format(obj.ClassName()))
-		print('    Title: {}'.format(obj.GetTitle()))
-		print('    Name: {}'.format(obj.GetName()))
-		print('    Size: {} (NBytes)'.format(key.GetNbytes()))
+		print_obj_info(obj, nspc=4)
+		if obj.ClassName() == 'TDirectoryFile':
+			inspect_keys(obj.GetListOfKeys(), nspc=6)
 	print()
-
 		
 if ShowBranches:
 	print('Showing Branches for tree name: {}'.format(TreeName))
-
+	
+	if len(TreeName.split('/')) > 2:
+		raise ValueError('Nesting of trees beyond depth of 2 not supported'\
+			+' (yet): {}.'.format(Treename))
+	
 	try:
-		Tree = TFile.GetKey(TreeName).ReadObj()
+		if '/' in TreeName:
+			TDirectory = TFile.GetKey(TreeName.split('/')[0]).ReadObj()
+			Tree = TDirectory.GetKey(TreeName.split('/')[1]).ReadObj()
+		else:
+			Tree = TFile.GetKey("{}".format(TreeName)).ReadObj()
 		Branches = Tree.GetListOfBranches()
 		print('Number of branches in file: {}\n'.format(len(Branches)))
 		for branch in Branches:
