@@ -84,6 +84,9 @@ tree_group = parser.add_argument_group('tree_group')
 tree_group.add_argument('--show-branches', dest='show_branches', action='store_true',
 					default=False,
 					help='Show branches in tree. Can specify tree name.')
+tree_group.add_argument('--get-nevents', dest='get_nevents', action='store_true',
+					default=False,
+					help='Simply get the number of events in the tree.')
 tree_group.add_argument('--tree-name', dest='tree_name', action='store',
 					default='tree', type=str,
 					help='Name of which tree to inspect.')
@@ -110,6 +113,7 @@ CheckHistogram = args.check_histogram
 HistName = args.hist_name
 SaveHist = args.save_hist
 RootFile = args.rootfile
+GetNEvents = args.get_nevents
 
 ## MAIN ##
 print('\n'+'-'*80)
@@ -174,3 +178,26 @@ if ShowBranches:
 		print('TFile.GetKey({})'.format(TreeName))
 		print('Returned a null pointer. Tree with name {}'.format(TreeName))
 		print('does not exist in file {}\n'.format(RootFileName))
+
+if GetNEvents:
+	print('Showing number of events for tree name: {}'.format(TreeName))
+
+	if len(TreeName.split('/')) > 2:
+		raise ValueError('Nesting of trees beyond depth of 2 not supported'\
+			+' (yet): {}.'.format(Treename))
+
+	try:
+		if '/' in TreeName:
+			TDirectory = TFile.GetKey(TreeName.split('/')[0]).ReadObj()
+			Tree = TDirectory.GetKey(TreeName.split('/')[1]).ReadObj()
+		else:
+			Tree = TFile.GetKey("{}".format(TreeName)).ReadObj()
+		
+		Entries = Tree.GetEntries()
+		print('Number of entries in file: {}\n'.format(Entries))
+	
+	except ReferenceError as re:
+		print('TFile.GetKey({})'.format(TreeName))
+		print('Returned a null pointer. Tree with name {}'.format(TreeName))
+		print('does not exist in file {}\n'.format(RootFileName))
+
