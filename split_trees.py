@@ -75,7 +75,7 @@ parser.add_argument('--savestring', dest='savestring', action='store',
 					default=None, type=str,
 					help='Add additional information to saved file name.')
 parser.add_argument('--savefolder', dest='savefolder', action='store',
-					default='downsampled_trees/', type=str,
+					default=None, type=str,
 					help='Folder to place the smaller trees.')
 parser.add_argument('--treename', dest='treename', action='store',
 					default=None, type=str,
@@ -101,15 +101,20 @@ Inspect = args.inspect
 ParentDir = Path(rfilename).parent
 RootFile_lone = Path(rfilename).name
 
-if SaveFolder != 'downsampled_trees/':
+if SaveFolder is None:
+	SaveFolder = ParentDir+'/downsampled_trees/',
+
+	if not os.path.exists('{}'.format(SaveFolder)):
+		print('Folder:')
+		print('{}'.format(SaveFolder))
+		print('does not exist ==> creating folder!\n')
+		os.system('mkdir -p {}'.format(SaveFolder))
+else:
+	if not os.path.exists('{}'.format(SaveFolder)):
+		raise ValueError('{} does not exist.'.format(SaveFolder))
 	if SaveFolder[-1] != '/':
 		SaveFolder += '/'
-
-if not os.path.exists('{}/{}'.format(ParentDir, SaveFolder)):
-	print('Folder:')
-	print('{}/{}'.format(ParentDir, SaveFolder))
-	print('does not exist ==> creating folder!\n')
-	os.system('mkdir -p {}/{}'.format(ParentDir, SaveFolder))
+	print('Saving file(s) to {}'.format(SaveFolder))
 
 #=========================#
 ## Inspect File Contents ##
@@ -154,11 +159,11 @@ except OSError as ose:
 
 # pull root file name from rfile
 if TreeName is None:
-	TreeName = '{}/{}{}'.format(ParentDir, SaveFolder,
+	TreeName = '{}{}'.format(SaveFolder,
 		RootFile_lone).replace(
 		'.root', '_downsampled_{}_.root'.format(Events))
 else:
-	TreeName = '{}/{}{}'.format(ParentDir, SaveFolder, TreeName)
+	TreeName = '{}{}'.format(SaveFolder, TreeName)
 	if not 'root' in TreeName:
 		TreeName += '.root'
 

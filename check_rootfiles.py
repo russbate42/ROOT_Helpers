@@ -81,9 +81,12 @@ parser.add_argument('--full-inspect', dest='inspect',
 
 tree_group = parser.add_argument_group('tree_group')
 
-tree_group.add_argument('--show-branches', dest='show_branches', action='store_true',
+tree_group.add_argument('--list-branches', dest='list_branches', action='store_true',
 					default=False,
-					help='Show branches in tree. Can specify tree name.')
+					help='List branches in tree. Can specify tree name.')
+tree_group.add_argument('--show-branch-type', dest='show_branch_type',
+					action='store_true', default=False,
+					help='Show branch data type listed in --list-branches.')
 tree_group.add_argument('--get-nevents', dest='get_nevents', action='store_true',
 					default=False,
 					help='Simply get the number of events in the tree.')
@@ -107,13 +110,14 @@ args = parser.parse_intermixed_args()
 Interactive = args.interactive
 ListContent = args.list_content
 Inspect = args.inspect
-ShowBranches = args.show_branches
+ListBranches = args.list_branches
 TreeName = args.tree_name
 CheckHistogram = args.check_histogram
 HistName = args.hist_name
 SaveHist = args.save_hist
 RootFile = args.rootfile
 GetNEvents = args.get_nevents
+ShowBranchType = args.show_branch_type
 
 ## MAIN ##
 print('\n'+'-'*80)
@@ -140,9 +144,7 @@ def inspect_keys(keylist, nspc=4):
 		obj = key.ReadObj()
 		print_obj_info(obj, nspc=nspc)
 	return None
-
-key_list = TFile.GetListOfKeys()
-
+key_list = TFile.GetListOfKeys() 
 if ListContent:
 	print('Listing content:')
 	print('Number of objects in file: {}'.format(len(key_list)))
@@ -155,7 +157,7 @@ if ListContent:
 			inspect_keys(obj.GetListOfKeys(), nspc=6)
 	print()
 		
-if ShowBranches:
+if ListBranches:
 	print('Showing Branches for tree name: {}'.format(TreeName))
 	
 	if len(TreeName.split('/')) > 2:
@@ -172,6 +174,8 @@ if ShowBranches:
 		print('Number of branches in file: {}\n'.format(len(Branches)))
 		for branch in Branches:
 			print('    {}'.format(branch.GetFullName()))
+			if ShowBranchType:
+				print(' '*8+'{}'.format(branch.GetClassName()))
 		print()
 
 	except ReferenceError as re:
