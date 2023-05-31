@@ -26,42 +26,6 @@ def open_rfile(rfilename):
 		print('Caught OSError: \n{} \n'.format(ose))
 		return None
 
-def inspect_rootfile(rootfile, keys=True, obj=True, rootmap=True):
-	TFile = open_rfile(rootfile)
-
-	print('\n'+'-'*80)
-	print('-- Inspecting ROOT file: {}'.format(rootfile))
-	print('-'*80+'\n')
-
-	print(' -- key list -- ')
-	if keys:
-		key_list = TFile.GetListOfKeys()
-		print('key list: {}'.format(key_list))
-		print('length of key list: {}'.format(len(key_list)))
-		print('key list type: {}\n'.format(type(key_list)))
-
-		if obj:
-			print(' -- showing keys and their respective objects --')
-		else:
-			print(' -- showing keys in list --')
-
-		for key in key_list:
-			print('\nkey: {}'.format(key))
-			print('key type: {}'.format(type(key)))
-			print('key title: {}'.format(key.GetTitle()))
-			print('key size: {} (NBytes)'.format(key.GetNbytes()))
-
-			if obj:
-				obj = key.ReadObj()
-				print('object: {}'.format(obj))
-				print('object type: {}'.format(type(obj)))
-
-	if rootmap:
-		print('\n -- Printing ->Map() function --')
-		TFile.Map()
-
-	print('\n'+'-'*80+'\n')
-	return None
 
 ## ARGPARSING ##
 parser = argparse.ArgumentParser(
@@ -76,17 +40,17 @@ parser.add_argument('--savestring', dest='savestring', action='store',
 					help='Add additional information to saved file name.')
 parser.add_argument('--savefolder', dest='savefolder', action='store',
 					default=None, type=str,
-					help='Folder to place the smaller trees.')
+					help='Folder to place the smaller trees. The default is \
+					to create /downsampled_trees/ in the rootfile directory.')
 parser.add_argument('--treename', dest='treename', action='store',
 					default=None, type=str,
-					help='Name to save output tree as.')
+					help='Name to save output tree as. Default is \'tree\'.')
+parser.add_argument('--filename', dest='filename', action='store',
+					default=None, type=str,
+					help='Name to save the split file as.')
 parser.add_argument('--events', dest='events', action='store',
 					default=None, type=int,
 					help='Number events to downsample to.')
-parser.add_argument('--inspect-rootfile', dest='inspect',
-					action='store_true',
-					help='Temporary functionality to inspect root files. \
-					May be removed in the future.')
 
 # argparsing
 args = parser.parse_intermixed_args()
@@ -94,15 +58,16 @@ args = parser.parse_intermixed_args()
 rfilename = args.rootfile
 Savestring = args.savestring
 SaveFolder = args.savefolder
+NewFileName = args.filename
 TreeName = args.treename
 Events = args.events
-Inspect = args.inspect
 
 ParentDir = Path(rfilename).parent
 RootFile_lone = Path(rfilename).name
 
 if SaveFolder is None:
-	SaveFolder = ParentDir+'/downsampled_trees/',
+	
+	SaveFolder = str(ParentDir)+'/downsampled_trees/'
 
 	if not os.path.exists('{}'.format(SaveFolder)):
 		print('Folder:')
@@ -116,11 +81,6 @@ else:
 		SaveFolder += '/'
 	print('Saving file(s) to {}'.format(SaveFolder))
 
-#=========================#
-## Inspect File Contents ##
-#=========================#
-if Inspect:
-	inspect_rootfile(rfilename, rootmap=False)
 
 # check if root file exists
 try:
@@ -158,19 +118,21 @@ except OSError as ose:
 		+'{} \n'.format(ose))
 
 # pull root file name from rfile
-if TreeName is None:
-	TreeName = '{}{}'.format(SaveFolder,
+if NewFileName is None:
+	NewFileName = '{}{}'.format(SaveFolder,
 		RootFile_lone).replace(
 		'.root', '_downsampled_{}_.root'.format(Events))
 else:
-	TreeName = '{}{}'.format(SaveFolder, TreeName)
-	if not 'root' in TreeName:
+	NewFileName = '{}{}'.format(SaveFolder, NewFileName)
+	if not '.root' in NewFileName:
 		TreeName += '.root'
 
-df = ROOT.RDataFrame("tree", rfilename)
-print('saving to: {}\n'.format(TreeName))
+if TreeName is None:
+	TreeName = 'tree'
+df = ROOT.RDataFrame(TreeName, rfilename)
+print('saving to: {}\n'.format(NewFileName))
 
-df.Range(Events).Snapshot('tree', TreeName)
+df.Range(Events).Snapshot('tree', NewFileName)
 
 print('\n	 done!\n')
 
