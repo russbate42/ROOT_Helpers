@@ -37,7 +37,8 @@ parser.add_argument('rootfile', # positional argument
 					help='ROOT file to split to something smaller.')
 parser.add_argument('--savestring', dest='savestring', action='store',
 					default=None, type=str,
-					help='Add additional information to saved file name.')
+					help='Add additional information to saved file name. \
+					Ignored if --filename is given.')
 parser.add_argument('--savefolder', dest='savefolder', action='store',
 					default=None, type=str,
 					help='Folder to place the smaller trees. The default is \
@@ -119,9 +120,14 @@ except OSError as ose:
 
 # pull root file name from rfile
 if NewFileName is None:
-	NewFileName = '{}{}'.format(SaveFolder,
-		RootFile_lone).replace(
-		'.root', '_downsampled_{}_.root'.format(Events))
+	if Savestring is None:
+		NewFileName = '{}{}'.format(SaveFolder,
+			RootFile_lone).replace(
+			'.root', '_downsampled_{}.root'.format(Events))
+	else:
+		NewFileName = '{}{}'.format(SaveFolder,
+			RootFile_lone).replace(
+			'.root', '_downsampled_{}-{}.root'.format(Events, Savestring))
 else:
 	NewFileName = '{}{}'.format(SaveFolder, NewFileName)
 	if not '.root' in NewFileName:
