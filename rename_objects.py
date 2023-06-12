@@ -66,9 +66,6 @@ tree_group = parser.add_argument_group('tree_group')
 tree_group.add_argument('--tree-name', dest='tree_name', action='store',
 					default='tree', type=str,
 					help='Name of which tree to inspect.')
-tree_group.add_argument('--list-aliases', dest='list_aliases',
-					action='store_true',
-					help='List existing aliases for the tree.')
 tree_group.add_argument('--old-branches', dest='old_branches', action='store',
 					type=str, nargs='+',
 					help='Names of branches to change to.')
@@ -85,7 +82,7 @@ Leading = args.leading
 SubLeading = args.subleading
 OldBranches = args.old_branches
 NewBranches = args.new_branches
-ListAliases = args.list_aliases
+
 
 							##############
 							## BRANCHES ##
