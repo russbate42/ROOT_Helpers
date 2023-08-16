@@ -131,7 +131,7 @@ if NewFileName is None:
 else:
 	NewFileName = '{}{}'.format(SaveFolder, NewFileName)
 	if not '.root' in NewFileName:
-		TreeName += '.root'
+		NewFileName += '.root'
 
 if TreeName is None:
 	TreeName = 'tree'
