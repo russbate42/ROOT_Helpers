@@ -30,19 +30,21 @@ def open_rfile(rfilename):
 ## ARGPARSING ##
 parser = argparse.ArgumentParser(
 					prog = 'split_trees',
-					description = '.',
+					description = 'Split trees uses RDataFrames to create '\
+                    +'downsampled files. Unless events is given, it takes '\
+                    +'10% of the existing file.',
 					epilog = 'Warning: this code should be used after all '\
 					+'trees have been combined!')
 parser.add_argument('rootfile', # positional argument
 					help='ROOT file to split to something smaller.')
 parser.add_argument('--savestring', dest='savestring', action='store',
 					default=None, type=str,
-					help='Add additional information to saved file name. \
-					Ignored if --filename is given.')
+					help='Add additional information to saved file name. '\
+					+'Ignored if --filename is given.')
 parser.add_argument('--savefolder', dest='savefolder', action='store',
 					default=None, type=str,
-					help='Folder to place the smaller trees. The default is \
-					to create /downsampled_trees/ in the rootfile directory.')
+					help='Folder to place the smaller trees. The default is '\
+					+'to create /downsampled_trees/ in the rootfile directory.')
 parser.add_argument('--treename', dest='treename', action='store',
 					default=None, type=str,
 					help='Name to save output tree as. Default is \'tree\'.')
@@ -135,10 +137,10 @@ else:
 
 if TreeName is None:
 	TreeName = 'tree'
+
 df = ROOT.RDataFrame(TreeName, rfilename)
 print('saving to: {}\n'.format(NewFileName))
 
-df.Range(Events).Snapshot('tree', NewFileName)
-
-print('\n	 done!\n')
+df.Range(Events).Snapshot(TreeName, NewFileName)
+print('\n       done!\n')
 

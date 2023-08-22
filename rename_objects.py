@@ -54,14 +54,18 @@ parser.add_argument('rootfile', # positional argument
 parser.add_argument('--verbose', action='store_true',
 					help='ROOT file to change.')
 parser.add_argument('--r21-to-r22', dest='r21tor22', action='store_true',
-					help='Default naming convention for Athena release 21 \
-					jets to release 22.')
+					help='Default naming convention for Athena release 21 '\
+					+'jets to release 22.')
 parser.add_argument('--leading', dest='leading', action='store_true',
-					help='Use flag if naming convention uses trailing 0 to \
-					indicate the leading jet.')
+					help='Use flag if naming convention uses trailing 0 to '\
+					+'indicate the leading jet.')
 parser.add_argument('--subleading', dest='subleading', action='store_true',
-					help='Use flag if naming convention uses trailing 1 to \
-					indicate the sub-leading jet.')
+					help='Use flag if naming convention uses trailing 1 to '\
+					+'indicate the sub-leading jet.')
+parser.add_argument('--savefolder', dest='savefolder', action='store',
+					default=None, type=str,
+					help='Folder to save the renamed trees. Default is in '\
+					+'the same folder.')
 tree_group = parser.add_argument_group('tree_group')
 tree_group.add_argument('--tree-name', dest='tree_name', action='store',
 					default='tree', type=str,
@@ -74,6 +78,7 @@ tree_group.add_argument('--new-branches', dest='new_branches', action='store',
 					help='Names of branches to change to.')
 args = parser.parse_intermixed_args()
 
+SaveFolder = args.savefolder
 TreeName = args.tree_name
 Verbose = args.verbose
 RootFile = args.rootfile
@@ -83,6 +88,24 @@ SubLeading = args.subleading
 OldBranches = args.old_branches
 NewBranches = args.new_branches
 
+ParentDir = Path(rfilename).parent
+RootFile_lone = Path(rfilename).name
+
+if SaveFolder is None:
+	
+	SaveFolder = str(ParentDir)
+
+	if not os.path.exists('{}'.format(SaveFolder)):
+		print('Folder:')
+		print('{}'.format(SaveFolder))
+		print('does not exist ==> creating folder!\n')
+		os.system('mkdir -p {}'.format(SaveFolder))
+else:
+	if not os.path.exists('{}'.format(SaveFolder)):
+		raise ValueError('{} does not exist.'.format(SaveFolder))
+	if SaveFolder[-1] != '/':
+		SaveFolder += '/'
+	print('Saving file(s) to {}'.format(SaveFolder))
 
 							##############
 							## BRANCHES ##
