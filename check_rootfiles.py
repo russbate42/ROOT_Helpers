@@ -87,6 +87,9 @@ tree_group.add_argument('--list-branches', dest='list_branches', action='store_t
 tree_group.add_argument('--show-branch-type', dest='show_branch_type',
                     action='store_true', default=False,
                     help='Show branch data type listed in --list-branches.')
+tree_group.add_argument('--branch-events', dest='branch_events', action='store_true',
+                    default=False,
+                    help='Get the number of events in each branch.')
 tree_group.add_argument('--get-nevents', dest='get_nevents', action='store_true',
                     default=False,
                     help='Simply get the number of events in the tree.')
@@ -118,6 +121,7 @@ SaveHist = args.save_hist
 RootFile = args.rootfile
 GetNEvents = args.get_nevents
 ShowBranchType = args.show_branch_type
+BranchEvents = args.branch_events
 
 ## MAIN ##
 print('\n'+'-'*80)
@@ -172,14 +176,33 @@ if ListBranches:
             Tree = TFile.GetKey("{}".format(TreeName)).ReadObj()
         Branches = Tree.GetListOfBranches()
         print('Number of branches in file: {}\n'.format(len(Branches)))
-        for branch in Branches:
-            print('    {}'.format(branch.GetFullName()))
-            if ShowBranchType:
-                BranchClassName = branch.GetClassName()
-                if BranchClassName == '':
-                    print(' '*8+'{}'.format(type(branch.GetFirstEntry())))
-                else:
-                    print(' '*8+'{}'.format(BranchClassName))
+ 
+        if BranchEvents:
+            print('\t{:>32s}  |  Number in Branch'.format('Branch'))
+            print('-'*80)
+            for branch in Branches:
+
+                branchname = str(branch.GetFullName())
+                branchentries = branch.GetEntries()
+
+                print('\t{:>32s}  |  {}  '.format(branchname, branchentries))
+                
+                if ShowBranchType:
+                    BranchClassName = branch.GetClassName()
+                    if BranchClassName == '':
+                        print(' '*8+'{}'.format(type(branch.GetFirstEntry())))
+                    else:
+                        print(' '*8+'{}'.format(BranchClassName))
+        else:
+            for branch in Branches:
+                print('    {}'.format(branch.GetFullName()))
+                if ShowBranchType:
+                    BranchClassName = branch.GetClassName()
+                    if BranchClassName == '':
+                        print(' '*8+'{}'.format(type(branch.GetFirstEntry())))
+                    else:
+                        print(' '*8+'{}'.format(BranchClassName))
+        
         print()
 
     except ReferenceError as re:
