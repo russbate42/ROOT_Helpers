@@ -54,6 +54,13 @@ parser.add_argument('--filename', dest='filename', action='store',
 parser.add_argument('--events', dest='events', action='store',
 					default=None, type=int,
 					help='Number events to downsample to.')
+parser.add_argument('--multithreading', default=True,
+                    action=argparse.BooleanOptionalAction,
+                    help='Use ROOT multithreading. '\
+                    +'WARNING: Will shuffle contents if enabled.')
+parser.add_argument('--CPUS', action='store',
+                    type=int, default=8,
+                    help='Number of CPUS, maximum 10 for now.')
 
 # argparsing
 args = parser.parse_intermixed_args()
@@ -64,9 +71,14 @@ SaveFolder = args.savefolder
 NewFileName = args.filename
 TreeName = args.treename
 Events = args.events
+MultiThreading = args.multithreading
+CPUS = args.CPUS
 
 ParentDir = Path(rfilename).parent
 RootFile_lone = Path(rfilename).name
+
+if MultiThreading:
+    ROOT.EnableImplicitMT(CPUS)
 
 if SaveFolder is None:
 	
@@ -141,6 +153,11 @@ if TreeName is None:
 df = ROOT.RDataFrame(TreeName, rfilename)
 print('saving to: {}\n'.format(NewFileName))
 
-df.Range(Events).Snapshot(TreeName, NewFileName)
-print('\n       done!\n')
+if not MultiThreading:
+    df.Range(Events).Snapshot(TreeName, NewFileName)
+    print('\n       done!\n')
+else:
+    df = df.Filter('rdfentry_<={}'.format(Events))
+    df.Snapshot(TreeName, NewFileName)
+    print('\n       done!\n')
 
