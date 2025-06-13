@@ -12,6 +12,7 @@ email: russell.bate@cern.ch, russellbate@phas.ubc.ca
 import argparse, sys, os
 import ROOT
 from pathlib import Path
+from utils import print_obj_info
 
 ## FUNCTIONS ##
 def open_rfile(rfilename):
@@ -135,19 +136,6 @@ if TFile is None:
 RootFileName = Path(RootFile).name
 RootFileParent = Path(RootFile).parent
 
-def print_obj_info(obj, nspc=4):
-    print(' '*nspc+'Object: {}'.format(obj.ClassName()))
-    print(' '*nspc+'Title: {}'.format(obj.GetTitle()))
-    print(' '*nspc+'Name: {}'.format(obj.GetName()))
-    print(' '*nspc+'Size: {} (NBytes)'.format(key.GetNbytes()))
-    return None
-
-def inspect_keys(keylist, nspc=4):
-    print(' '*nspc+'Listing content of keys')
-    for j, key in enumerate(keylist):
-        obj = key.ReadObj()
-        print_obj_info(obj, nspc=nspc)
-    return None
 key_list = TFile.GetListOfKeys() 
 if ListContent:
     print('Listing content:')
@@ -156,7 +144,7 @@ if ListContent:
     for j, key in enumerate(key_list):
         obj = key.ReadObj()
         print('\nkey: {}'.format(j))
-        print_obj_info(obj, nspc=4)
+        print_obj_info(obj, key, nspc=4)
         if obj.ClassName() == 'TDirectoryFile':
             inspect_keys(obj.GetListOfKeys(), nspc=6)
     print()
