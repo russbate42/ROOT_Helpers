@@ -25,6 +25,7 @@ ROOT.gInterpreter.Declare(
 
 #include<ROOT/RVec.hxx>
 """)
+ROOT.gInterpreter.GenerateDictionary("ROOT::RVec<vector<float> >","vector;ROOT/RVec.hxx")
 
 print('\n' + '='*25)
 print('== DOWNSIZE ROOT FILES ==')
@@ -194,15 +195,16 @@ if SaveTreeName is None:
 df = ROOT.RDataFrame(TreeName, rfilename)
 print('saving to: {}\n'.format(NewFileName))
 
-ColumnNames = df.GetColumnNames()
+ColumnNames = list(df.GetColumnNames())
+print('Column Names:')
 print(ColumnNames)
 
-
 if not MultiThreading:
-    df.Range(Events).Snapshot(SaveTreeName, NewFileName, df.GetColumnNames())
-    print('\n       done!\n')
+    df = df.Filter(f'rdfentry_<={Events}')
+    df.Snapshot(SaveTreeName, NewFileName, ColumnNames)
+    print('\n\tdone!\n')
 else:
     df = df.Filter('rdfentry_<={}'.format(Events))
     df.Snapshot(SaveTreeName, NewFileName, df.GetColumnNames())
-    print('\n       done!\n')
+    print('\n\tdone!\n')
 

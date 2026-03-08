@@ -12,7 +12,7 @@ email: russell.bate@cern.ch, russellbate@phas.ubc.ca
 import argparse, sys, os
 import ROOT
 from pathlib import Path
-from utils import print_obj_info
+from utils import print_obj_info, inspect_keys
 
 ## FUNCTIONS ##
 def open_rfile(rfilename):
